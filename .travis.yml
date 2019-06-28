@@ -1,0 +1,30 @@
+sudo: required
+language: rust
+
+if: tag IS present
+
+rust: 1.32.0
+
+cache:
+  - cargo
+  - npm
+
+install:
+  - nvm install 10
+  - npm install -g roblox-ts
+  - command -v rojo >/dev/null 2>&1 || { cargo install rojo --version 0.5.0-alpha.11; }
+
+script:
+  - npm install
+  - npm install @rbxts/types
+  - rbxtsc
+  - rojo build -o bundle.rbxmx
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_API_KEY"
+  file: "bundle.rbxmx"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true

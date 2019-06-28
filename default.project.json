@@ -1,0 +1,9 @@
+{
+	"name": "bundle",
+	"tree": {
+		"$path": "out",
+		"include": {
+			"$path": "include"
+		}
+	}
+}

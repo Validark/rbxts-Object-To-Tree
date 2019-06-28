@@ -1,0 +1,27 @@
+{
+	"name": "roblox-ts-demo-bundle",
+	"version": "1.0.0",
+	"description": "",
+	"scripts": {
+		"release-major": "npm version major && git push --tags",
+		"release-minor": "npm version minor && git push --tags",
+		"release-patch": "npm version patch && git push --tags",
+		"build": "rbxtsc && rojo build --output build.rbxlx",
+		"install-rojo": "cargo install --force --git https://github.com/LPGhatguy/rojo.git"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/roblox-ts/demo-bundle.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/roblox-ts/demo-bundle/issues"
+	},
+	"homepage": "https://github.com/roblox-ts/demo-bundle#readme",
+	"dependencies": {
+		"@rbxts/services": "^1.0.23",
+		"@rbxts/types": "^1.0.220"
+	}
+}
