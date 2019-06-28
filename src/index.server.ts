@@ -241,8 +241,16 @@ plugin
 			generateInterface(selected);
 		}
 
-		if (selection.size() > 1) {
-			new Feedback("Generated multiple files in Lighting!");
+		switch (selection.size()) {
+			case 0:
+				new Feedback(
+					"Please select an instance in the explorer to convert to a tree, then click this button again."
+				);
+				break;
+			case 1:
+				break;
+			default:
+				new Feedback("Generated multiple files in Lighting!");
 		}
 	});
 

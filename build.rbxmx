@@ -2,8 +2,8 @@
   <Item class="Script" referent="0">
     <Properties>
       <string name="Name">rbxts-object-to-tree</string>
-      <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.2
--- June 28, 2019, 2:58 AM Central Daylight Time
+      <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.3
+-- June 28, 2019, 5:18 AM Central Daylight Time
 
 local TS = require(script.include.RuntimeLib);
 local Feedback, generateSubInterface;
@@ -251,9 +251,17 @@ plugin:CreateToolbar(PLUGIN_NAME):CreateButton(PLUGIN_NAME, PLUGIN_DESCRIPTION, 
 		local selected = selection[_1];
 		generateInterface(selected);
 	end;
-	if #selection > 1 then
+	local _2 = #selection;
+	repeat
+		if _2 == 0 then
+			Feedback.new("Please select an instance in the explorer to convert to a tree, then click this button again.");
+			break;
+		end;
+		if _2 == 1 then
+			break;
+		end;
 		Feedback.new("Generated multiple files in Lighting!");
-	end;
+	until true;
 end);
 ]]></string>
     </Properties>
