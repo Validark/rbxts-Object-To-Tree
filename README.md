@@ -38,3 +38,8 @@ interface Workspace extends Model {
 Then, anywhere you access `Workspace`, you can access the defined members!
 
 ###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.
+
+
+## Help wanted
+
+If someone would like to make an icon for this plugin, it would be much appreciated!
