@@ -1,20 +1,40 @@
-# roblox-ts Demo Template
+# roblox-ts object-to-tree
 
-Looking to get started with [**roblox-ts**](https://roblox-ts.github.io)?
-Just download this repository to get started!
+You can install this [plugin here](https://www.roblox.com/library/3379119778/rbxts-object-to-tree).
 
-## Prerequisites
-You'll need:
-- NodeJS and NPM
-- roblox-ts 0.1.7+ ( `npm i -g roblox-ts` )
-- Rojo 0.5.x
+Simply select the instance you want converted into a tree, and click on the plugin to generate its tree (inserted into `Lighting`).
 
-If you're unsure on how to install these things, please refer to our ["Quick Start" guide](https://roblox-ts.github.io/docs/quick-start).
+Outputted trees look like so:
 
-## Setup
-`npm install`
+```ts
+type SpawnLocation = SpawnLocation & {
+	Decal: Decal;
+	Data: Configuration & {
+		NumSpawns: IntValue;
+		GiveForceField: BoolValue;
+	};
+}
+```
 
-## Usage
-`rbxtsc && rojo build --output build.rbxmx`
+The plugin also supports overriding services which are browsable in Roblox Studio. For example:
 
-This will compile your files into the `out` folder and then create a `build.rbxmx` to open in Roblox Studio.
+```ts
+interface Workspace extends Model {
+	Terrain: Terrain;
+	Camera: Camera;
+	Baseplate: Part & {
+		BFC: BoolValue;
+	};
+	SpawnLocation: SpawnLocation & {
+		Decal: Decal;
+		Data: Configuration & {
+			NumSpawns: IntValue;
+			GiveForceField: BoolValue;
+		};
+	};
+}
+```
+
+Then, anywhere you access `Workspace`, you can access the defined members!
+
+###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.

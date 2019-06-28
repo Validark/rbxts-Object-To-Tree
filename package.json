@@ -1,7 +1,7 @@
 {
-	"name": "roblox-ts-demo-bundle",
+	"name": "rbxts-object-to-tree",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Converts an object in Roblox Studio into its TS tree form.",
 	"scripts": {
 		"release-major": "npm version major && git push --tags",
 		"release-minor": "npm version minor && git push --tags",
@@ -14,14 +14,15 @@
 		"url": "git+https://github.com/roblox-ts/demo-bundle.git"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Validark",
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/roblox-ts/demo-bundle/issues"
 	},
 	"homepage": "https://github.com/roblox-ts/demo-bundle#readme",
 	"dependencies": {
+		"@rbxts/make": "^1.0.1",
 		"@rbxts/services": "^1.0.23",
-		"@rbxts/types": "^1.0.220"
+		"@rbxts/types": "^1.0.226"
 	}
 }
