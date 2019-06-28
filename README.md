@@ -37,6 +37,11 @@ interface Workspace extends Model {
 
 Then, anywhere you access `Workspace`, you can access the defined members!
 
+```ts
+const workspace = game.GetService("Workspace");
+print(++workspace.SpawnLocation.Data.NumSpawns.Value);
+```
+
 ###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.
 
 
