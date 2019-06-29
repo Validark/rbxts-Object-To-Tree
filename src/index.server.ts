@@ -1,11 +1,13 @@
 /// <reference types="@rbxts/types/plugin"/>
 import Make from "@rbxts/make";
-import { Selection, Lighting } from "@rbxts/services";
+import { Selection, Lighting, HttpService } from "@rbxts/services";
 
 const ICON_ID = 0;
 const PLUGIN_NAME = "roblox-ts-object-to-tree";
 const PLUGIN_DESCRIPTION =
 	"A tool for converting instances to their TS tree form. Ignores all instances with name collisions.";
+
+const IO_SERVE_URL = "http://localhost:33333";
 
 /** A lightweight feedback system */
 class Feedback {
@@ -196,28 +198,16 @@ function publishSlice(name: string, slice: string, parent: Instance) {
 	});
 }
 
-/** Generates an interface for a given instance. Publishes results to Lighting */
-function generateInterface(instance: Instance) {
-	const results = new Array<string>();
-	results.push(createTopLevelInterface(instance));
-	results.push(" {\n");
+/** Writes output to Script objects inside of Lighting */
+function writeToLighting(name: string, source: string) {
+	const sourceSize = source.size();
+	const topSlice = publishSlice(name, source.slice(0, 20_000), Lighting);
 
-	for (const child of getUniqueChildren(instance)) {
-		results.push(`\t${validTSIdentifier(child.Name)}: ${child.ClassName}`);
-		generateSubInterface(results, child, 2);
-	}
-
-	results.push("}\n");
-
-	const final = results.join("");
-	const finalSize = final.size();
-	const topSlice = publishSlice(instance.Name, final.slice(0, 20_000), Lighting);
-
-	if (finalSize >= 20_000) {
+	if (sourceSize >= 20_000) {
 		let previous = 0;
 
-		for (let i = 20_000; i < final.size(); i += 20_000) {
-			publishSlice(instance.Name, final.slice(previous, i), topSlice);
+		for (let i = 20_000; i < source.size(); i += 20_000) {
+			publishSlice(name, source.slice(previous, i), topSlice);
 			previous = i;
 		}
 
@@ -231,14 +221,60 @@ function generateInterface(instance: Instance) {
 	}
 }
 
+/** tests to see if io-serve is available */
+function isIoServeAvailable() {
+	const result = opcall(() => HttpService.RequestAsync({ Url: IO_SERVE_URL, Method: "HEAD" }));
+	return result.success === true && result.value.StatusCode === 200;
+}
+
+/** returns a relative path for io-serve */
+function getIoServePath(name: string) {
+	return `types/${name}.d.ts`;
+}
+
+/** Writes output to io-serve */
+function writeToIoServe(name: string, source: string) {
+	HttpService.RequestAsync({
+		Url: `${IO_SERVE_URL}/${getIoServePath(name)}`,
+		Method: "PUT",
+		Body: source
+	});
+	new Feedback(`Generated file \`${getIoServePath(name)}\` in io-serve!`);
+}
+
+/** Generates an interface for a given instance. */
+function generateInterface(instance: Instance, useIoServe: boolean) {
+	const results = new Array<string>();
+	results.push(createTopLevelInterface(instance));
+	results.push(" {\n");
+
+	for (const child of getUniqueChildren(instance)) {
+		results.push(`\t${validTSIdentifier(child.Name)}: ${child.ClassName}`);
+		generateSubInterface(results, child, 2);
+	}
+
+	results.push("}\n");
+
+	const final = results.join("");
+
+	if (useIoServe) {
+		writeToIoServe(instance.Name, final);
+	} else {
+		writeToLighting(instance.Name, final);
+	}
+}
+
 plugin
 	.CreateToolbar(PLUGIN_NAME)
 	.CreateButton(PLUGIN_NAME, PLUGIN_DESCRIPTION, `rbxassetid://${ICON_ID}`)
 	.Click.Connect(() => {
 		const selection = Selection.Get();
 
+		const useIoServe = isIoServeAvailable();
+		const locationText = useIoServe ? "to io-serve" : "in Lighting";
+
 		for (const selected of selection) {
-			generateInterface(selected);
+			generateInterface(selected, useIoServe);
 		}
 
 		switch (selection.size()) {
@@ -250,7 +286,7 @@ plugin
 			case 1:
 				break;
 			default:
-				new Feedback("Generated multiple files in Lighting!");
+				new Feedback(`Generated multiple files ${locationText}!`);
 		}
 	});
 
