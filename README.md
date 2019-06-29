@@ -42,7 +42,7 @@ const workspace = game.GetService("Workspace");
 print(++workspace.SpawnLocation.Data.NumSpawns.Value);
 ```
 
-To automatically insert these files into your project open up your project and run `npm i -g io-serve & npx io-serve`, then click the plugin in studio to generate your files.
+To automatically insert these files into your project open up your project and run `npx io-serve`, then click the plugin in studio to generate your files.
 
 
 ###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.
