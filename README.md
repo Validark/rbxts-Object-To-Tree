@@ -2,7 +2,7 @@
 
 You can install this [plugin here](https://www.roblox.com/library/3379119778/rbxts-object-to-tree).
 
-Simply select the instance you want converted into a tree, and click on the plugin to generate its tree (inserted into `Lighting`).
+Simply select the instance you want converted into a tree, and click on the plugin to generate its tree.
 
 Outputted trees look like so:
 
@@ -42,7 +42,12 @@ const workspace = game.GetService("Workspace");
 print(++workspace.SpawnLocation.Data.NumSpawns.Value);
 ```
 
+To automatically insert these files into your project open up your project and run `npm i -g io-serve & npx io-serve`, then click the plugin in studio to generate your files.
+
+
 ###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.
+
+###### Link to io-serve [here](https://www.npmjs.com/package/io-serve)
 
 
 ## Help wanted
