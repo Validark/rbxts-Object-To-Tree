@@ -1,9 +1,12 @@
 {
-	"name": "rbxts-object-to-tree",
-	"tree": {
-		"$path": "out",
-		"include": {
-			"$path": "include"
-		}
-	}
+    "name": "rbxts-object-to-tree",
+    "tree": {
+        "$className": "Folder",
+        "Main": {
+            "$path": "out",
+            "include": {
+                "$path": "include"
+            }
+        }
+    }
 }

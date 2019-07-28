@@ -6,7 +6,8 @@
 		"release-major": "npm version major && git push --tags",
 		"release-minor": "npm version minor && git push --tags",
 		"release-patch": "npm version patch && git push --tags",
-		"build": "rbxtsc && rojo build --output build.rbxlx",
+		"build": "rbxtsc && rojo build --output bundle.rbxmx",
+		"build-plugin": "npm run build & cp -f bundle.rbxmx C:/Users/blach/AppData/Local/Roblox/Plugins/rbxts-object-tree.rbxmx",
 		"install-rojo": "cargo install --force --git https://github.com/LPGhatguy/rojo.git"
 	},
 	"repository": {
@@ -21,8 +22,10 @@
 	},
 	"homepage": "https://github.com/roblox-ts/demo-bundle#readme",
 	"dependencies": {
+		"@rbxts/cue": "^1.0.1",
 		"@rbxts/make": "^1.0.1",
 		"@rbxts/services": "^1.0.23",
+		"@rbxts/tween": "^1.0.2",
 		"@rbxts/types": "^1.0.226"
 	}
 }
