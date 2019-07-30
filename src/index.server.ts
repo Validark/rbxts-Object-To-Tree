@@ -6,7 +6,7 @@ import Checkbox from "checkbox";
 // TODO: Make it automatically add to `default.project.json` files
 // TODO: Make it customizable what name the single-file Rojoesque generator should go to
 
-const ICON_ID = 0;
+const ICON_ID = 3561078226; // 3560977211;
 const PLUGIN_NAME = "roblox-ts-object-to-tree";
 const PLUGIN_DESCRIPTION =
 	"A tool for converting instances to their TS tree form. Ignores all instances with name collisions.";

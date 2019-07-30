@@ -8,6 +8,7 @@
 		"release-patch": "npm version patch && git push --tags",
 		"build": "rbxtsc && rojo build --output bundle.rbxmx",
 		"build-plugin": "npm run build & cp -f bundle.rbxmx C:/Users/blach/AppData/Local/Roblox/Plugins/rbxts-object-tree.rbxmx",
+		"plugin-build": "npm run build-plugin",
 		"install-rojo": "cargo install --force --git https://github.com/LPGhatguy/rojo.git"
 	},
 	"repository": {
