@@ -30,7 +30,6 @@ export = function getAPIDump() {
 						}
 					}
 
-					rbxClass.Members.sort((a, b) => (a.Name < b.Name ? -1 : 1));
 					dumpMap.set(rbxClass.Name, rbxClass);
 				}
 

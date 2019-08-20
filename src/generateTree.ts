@@ -354,7 +354,7 @@ function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, ommitted
 					instance.ClassName as keyof CreatableInstances,
 					rbxMember.Name as GetProperties<CreatableInstances[keyof CreatableInstances]>
 				)
-	).map(prop => prop.Name);
+	).sort(({ Name: a }, { Name: b }) => (a < b ? -1 : 1));
 }
 
 function instantiateHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Instance, results: Array<string>) {
@@ -364,7 +364,7 @@ function instantiateHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Ins
 		const varName = getTSVariableName(instance.Name);
 		results.push(`const ${varName} = new Instance("${instance.ClassName}");\n`);
 
-		for (const prop of getPropertiesToCompile(rbxClass, instance)) {
+		for (const { Name: prop } of getPropertiesToCompile(rbxClass, instance)) {
 			results.push(varName);
 			results.push(".");
 			results.push(prop);
@@ -414,12 +414,17 @@ function roactHelper(
 		const propResults = new Array<string>();
 		let propLength = children.size() > 0 ? 1 : 2;
 
-		for (let prop of getPropertiesToCompile(rbxClass, instance, new Set(["Parent"]))) {
+		for (let { Name: prop } of getPropertiesToCompile(rbxClass, instance, new Set(["Parent"]))) {
 			let valueStr = formatValue(instance[prop as keyof typeof instance]);
-			if (prop === "Name") prop = "Key";
 			if (valueStr.find(`^".+"$`)[0] === undefined) valueStr = `{${valueStr}}`;
-			propLength += depth * 4 + prop.size() + 4 + valueStr.size();
-			propResults.push(`${prop}=${valueStr}`);
+			propLength += (depth + 1) * 4 + valueStr.size();
+			if (prop === "Name") {
+				propResults.unshift(`Key=${valueStr}`);
+				propLength += 3;
+			} else {
+				propResults.push(`${prop}=${valueStr}`);
+				propLength += prop.size();
+			}
 		}
 
 		const multiline = propLength > 120;
