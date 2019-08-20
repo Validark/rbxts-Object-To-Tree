@@ -126,8 +126,8 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 				X: { Offset: offsetX, Scale: scaleX },
 				Y: { Offset: offsetY, Scale: scaleY }
 			} = value as UDim2;
-			return `new UDim2(${formatValue(offsetX)}, ${formatValue(scaleX)}, ${formatValue(offsetY)}, ${formatValue(
-				scaleY
+			return `new UDim2(${formatValue(scaleX)}, ${formatValue(offsetX)}, ${formatValue(scaleY)}, ${formatValue(
+				offsetY
 			)})`;
 		}
 		case "Vector2": {
