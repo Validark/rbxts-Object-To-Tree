@@ -2,6 +2,8 @@
 
 You can install this [plugin here](https://www.roblox.com/library/3379119778/rbxts-object-to-tree).
 
+[![](https://user-images.githubusercontent.com/15217173/63229057-a99d0680-c1c1-11e9-90b4-ee973e522a81.png)](https://www.roblox.com/library/3379119778/rbxts-object-to-tree)
+
 Simply select the instance you want converted into a tree, and click on the plugin to generate its tree.
 
 Outputted trees look like so:
@@ -48,8 +50,3 @@ To automatically insert these files into your project open up your project and r
 ###### Note: This plugin in no way guarantees that objects defined in TS this way will exist at run-time. Scripts can rename instances, move them around, or delete them. Don't do those things if you want the definition to be valid.
 
 ###### Link to io-serve [here](https://www.npmjs.com/package/io-serve)
-
-
-## Help wanted
-
-If someone would like to make an icon for this plugin, it would be much appreciated!

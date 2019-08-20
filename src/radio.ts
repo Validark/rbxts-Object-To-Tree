@@ -57,7 +57,7 @@ let numCheckboxes = 0;
 const Canceler: PseudoTween | { Running: false } = { Running: false };
 
 /** A material design Checkbox element. */
-class Checkbox {
+class Radio {
 	private isLightTheme!: boolean;
 	private button: ImageButton;
 	private check: ImageLabel;
@@ -71,7 +71,7 @@ class Checkbox {
 	public onChecked: Cue<(isChecked?: boolean) => void> = new Cue();
 
 	constructor(
-		settings?: GetPartialObjectWithBindableCueSlots<Checkbox> & {
+		settings?: GetPartialObjectWithBindableCueSlots<Radio> & {
 			parent?: Instance;
 			isChecked?: boolean;
 			position?: UDim2;
@@ -98,7 +98,9 @@ class Checkbox {
 		this.button = button;
 		this.check = check;
 
-		const switchChecked = () => this.setChecked(!this.isChecked);
+		const switchChecked = () => {
+			if (!this.getChecked()) this.setChecked(!this.isChecked);
+		};
 
 		const enterHoverState = () => {
 			this.isHovering = true;
@@ -142,7 +144,7 @@ class Checkbox {
 
 			this.isChecked = settings.isChecked;
 			this.setSize(settings.size || 24);
-			this.setBorderRadius(settings.borderRadius || 2);
+			this.setBorderRadius(settings.borderRadius === undefined ? 2 : settings.borderRadius);
 			this.setTheme(settings.theme || "Light");
 
 			if (position) button.Position = position;
@@ -292,8 +294,8 @@ class Checkbox {
 		return this.isChecked;
 	}
 
-	public clone(): Checkbox {
-		return new Checkbox({
+	public clone(): Radio {
+		return new Radio({
 			isChecked: this.isChecked,
 			position: this.button.Position,
 			anchorPoint: this.button.AnchorPoint,
@@ -303,4 +305,4 @@ class Checkbox {
 	}
 }
 
-export = Checkbox;
+export = Radio;
