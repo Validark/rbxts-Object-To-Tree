@@ -10,7 +10,7 @@ import generateOptions from "generateTree";
 import Feedback from "feedback";
 
 delay(1, () => {
-	const widgetSize = new Vector2(224, 248);
+	const widgetSize = new Vector2(227, 232); // new Vector2(224, 248);
 	const DockWidget = plugin.CreateDockWidgetPluginGui(
 		PLUGIN_NAME,
 		new DockWidgetPluginGuiInfo(
@@ -46,20 +46,6 @@ delay(1, () => {
 	BackImage.ZIndex = 0;
 	BackImage.Parent = Background;
 
-	const BottomHint = new Instance("TextLabel");
-	BottomHint.BackgroundTransparency = 1;
-	BottomHint.Font = Enum.Font.SourceSansSemibold;
-	BottomHint.Name = "BottomHint";
-	BottomHint.Position = new UDim2(0, 8, 0, 0);
-	BottomHint.Size = new UDim2(1, -16, 1, -4);
-	BottomHint.Text = "Run `npx io-serve` with HTTP requests enabled to automatically place files in your project.";
-	BottomHint.TextColor3 = Color3.fromRGB(0, 0, 0);
-	BottomHint.TextSize = 11;
-	BottomHint.TextTransparency = 0.46;
-	BottomHint.TextWrapped = true;
-	BottomHint.TextYAlignment = Enum.TextYAlignment.Bottom;
-	BottomHint.ZIndex = 2;
-
 	const Indicator = new Instance("Frame");
 	Indicator.BackgroundColor3 = Color3.fromRGB(4, 255, 0);
 	Indicator.BorderSizePixel = 0;
@@ -68,27 +54,44 @@ delay(1, () => {
 	Indicator.Size = new UDim2(1, 2, 0, 4);
 	Indicator.Visible = false;
 
+	const Choices = new Instance("Frame");
+	Choices.BackgroundTransparency = 1;
+	Choices.Name = "Choices";
+	Choices.Position = new UDim2(0, 0, 0, 0);
+	Choices.Size = new UDim2(1, 0, 1, 0);
+	Choices.ZIndex = 10;
+
 	const Instructions = new Instance("TextLabel");
 	Instructions.BackgroundTransparency = 1;
 	Instructions.Font = Enum.Font.SourceSans;
+	Instructions.LayoutOrder = -1;
 	Instructions.Name = "Instructions";
-	Instructions.Position = new UDim2(0, 8, 0, 4);
-	Instructions.Size = new UDim2(1, -8, 0, 18);
-	Instructions.Text = "Export type:";
+	Instructions.Text = "  Export type:";
 	Instructions.TextColor3 = Color3.fromRGB(0, 0, 0);
 	Instructions.TextSize = 18;
 	Instructions.TextTransparency = 0.13;
 	Instructions.TextWrapped = true;
 	Instructions.TextXAlignment = Enum.TextXAlignment.Left;
-	Instructions.TextYAlignment = Enum.TextYAlignment.Top;
+	Instructions.TextYAlignment = Enum.TextYAlignment.Center;
+	Instructions.Size = new UDim2(-8, 1, 18, 0);
 	Instructions.ZIndex = 2;
+	Instructions.Parent = Choices;
 
-	const Choices = new Instance("Frame");
-	Choices.BackgroundTransparency = 1;
-	Choices.Name = "Choices";
-	Choices.Position = new UDim2(0, 0, 0, 30);
-	Choices.Size = new UDim2(1, 0, 1, -88);
-	Choices.ZIndex = 10;
+	const BottomHint = new Instance("TextLabel");
+	BottomHint.TextSize = 11;
+	BottomHint.BackgroundTransparency = 1;
+	BottomHint.Font = Enum.Font.SourceSansSemibold;
+	BottomHint.LayoutOrder = 10;
+	BottomHint.Name = "BottomHint";
+	BottomHint.Size = new UDim2(-8, 1, 36, 0);
+	BottomHint.Text = "Run `npx io-serve` with HTTP requests enabled to automatically place files in your project.";
+	BottomHint.TextColor3 = Color3.fromRGB(0, 0, 0);
+	BottomHint.TextSize = 11;
+	BottomHint.TextTransparency = 0.46;
+	BottomHint.TextWrapped = true;
+	// BottomHint.TextYAlignment = Enum.TextYAlignment.Bottom;
+	BottomHint.ZIndex = 2;
+	BottomHint.Parent = Choices;
 
 	const UIGridLayout = new Instance("UIGridLayout");
 	UIGridLayout.CellPadding = new UDim2(0, 0, 0, 0);
@@ -235,11 +238,9 @@ delay(1, () => {
 		}
 	});
 
-	Instructions.Parent = Background;
 	Choices.Parent = Background;
 	UIGridLayout.Parent = Choices;
 	Indicator.Parent = Background;
-	BottomHint.Parent = Background;
 	Background.Parent = DockWidget;
 
 	plugin

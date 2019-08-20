@@ -338,7 +338,7 @@ const validSecurityTags = new ReadonlySet<SecurityType>(["None", "PluginSecurity
 
 function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, ommittedProperties = new Set<string>()) {
 	for (const { condition, omitProperties } of exclusionConditions) {
-		if (condition) for (const omitProperty of omitProperties) ommittedProperties.add(omitProperty);
+		if (condition(instance)) for (const omitProperty of omitProperties) ommittedProperties.add(omitProperty);
 	}
 
 	return rbxClass.Members.filter(
