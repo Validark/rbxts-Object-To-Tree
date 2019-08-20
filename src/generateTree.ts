@@ -402,7 +402,10 @@ function roactHelper(
 	const rbxClass = apiDump.get(instance.ClassName);
 
 	if (rbxClass) {
-		const children = instance.GetChildren();
+		const children = instance
+			.GetChildren()
+			.filter(child => child.IsA("GuiObject") || child.IsA("UIBase") || child.IsA("LayerCollector"));
+
 		const indent = `\t`.rep(depth);
 		results.push(indent);
 		results.push(`<`);
@@ -432,11 +435,10 @@ function roactHelper(
 		if (children.size() > 0) {
 			results.push(multiline ? `\n${indent}>` : `>`);
 			for (const child of children) {
-				if (child.IsA("GuiObject") || child.IsA("UIBase") || child.IsA("LayerCollector")) {
-					results.push("\n");
-					roactHelper(apiDump, child, results, depth + 1);
-				}
+				results.push("\n");
+				roactHelper(apiDump, child, results, depth + 1);
 			}
+			results.push("\n");
 			results.push(indent);
 			results.push(`</`);
 			results.push(instance.ClassName.lower());
@@ -444,8 +446,6 @@ function roactHelper(
 		} else {
 			results.push(multiline ? `\n` + indent + `/>` : propResults.size() ? ` />` : `/>`);
 		}
-
-		results.push("\n");
 	}
 
 	return results;

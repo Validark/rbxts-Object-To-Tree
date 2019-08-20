@@ -200,25 +200,38 @@ delay(1, () => {
 		return result.success && result.value.StatusCode === 200;
 	}
 
+	let generating = false;
+
 	GenerateButton.MouseButton1Click.Connect(() => {
-		const selection = Selection.Get();
-		const selectionSize = selection.size();
+		if (!generating) {
+			generating = true;
+			const selection = Selection.Get();
+			const selectionSize = selection.size();
 
-		if (0 < selectionSize) {
-			const useIoServe = isIoServeAvailable();
-			let success = true;
+			if (0 < selectionSize) {
+				const useIoServe = isIoServeAvailable();
+				let success = true;
 
-			for (const selected of selection) {
-				if (!generateOptions.get(getSelectedOption())!(selected, useIoServe)) {
-					success = false;
+				for (const selected of selection) {
+					try {
+						if (!generateOptions.get(getSelectedOption())!(selected, useIoServe)) {
+							success = false;
+						}
+					} catch (e) {
+						new Feedback(tostring(e));
+						break;
+					}
 				}
-			}
 
-			if (success && selectionSize !== 1) {
-				new Feedback(useIoServe ? "Sent multiple files to io-serve" : "Generated multiple files in Lighting!");
+				if (success && selectionSize !== 1) {
+					new Feedback(
+						useIoServe ? "Sent multiple files to io-serve" : "Generated multiple files in Lighting!"
+					);
+				}
+			} else {
+				new Feedback(`Please select something to generate.`);
 			}
-		} else {
-			new Feedback(`Please select something to generate.`);
+			generating = false;
 		}
 	});
 
