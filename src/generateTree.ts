@@ -3,7 +3,7 @@ import getAPIDump from "./apiDump";
 import { IO_SERVE_URL, OPTIONS } from "config";
 import Feedback from "feedback";
 import { HttpService, Lighting } from "@rbxts/services";
-import { SecurityType, ApiClass } from "api";
+import { SecurityType, ApiClass, MemberTag } from "api";
 
 /** Given an object, will return an array of Children, excluding children with duplicate names */
 function getUniqueChildren(object: Instance) {
@@ -23,9 +23,7 @@ function getUniqueChildren(object: Instance) {
 
 	for (const objName of shouldParse)
 		children.push(
-			(object as Instance & {
-				[K: string]: Instance;
-			})[objName]
+			object.FindFirstChild(objName)!
 		);
 
 	return children;
@@ -333,7 +331,7 @@ const exclusionConditions: Array<{ condition: (obj: Instance) => boolean; omitPr
 	{ condition: obj => obj.IsA("LuaSourceContainer"), omitProperties: ["Source"] }
 ];
 
-const ignoredTags = new ReadonlySet(["Deprecated", "NotScriptable", "ReadOnly"]);
+const ignoredTags = new ReadonlySet<MemberTag>(["Deprecated", "NotScriptable", "ReadOnly"]);
 const validSecurityTags = new ReadonlySet<SecurityType>(["None", "PluginSecurity"]);
 
 function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, ommittedProperties = new Set<string>()) {
@@ -354,7 +352,7 @@ function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, ommitted
 					instance.ClassName as keyof CreatableInstances,
 					rbxMember.Name as GetProperties<CreatableInstances[keyof CreatableInstances]>
 				)
-	).sort(({ Name: a }, { Name: b }) => (a < b ? -1 : 1));
+	).sort(({ Name: a }, { Name: b }) => (a < b ? false : true));
 }
 
 function instantiateHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Instance, results: Array<string>) {
