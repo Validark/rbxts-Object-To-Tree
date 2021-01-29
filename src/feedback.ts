@@ -1,4 +1,4 @@
-import { TextService } from "@rbxts/services";
+const TextService = game.GetService("TextService");
 
 const TEXT_SIZE = 18;
 const TEXT_FONT = Enum.Font.SourceSans;
@@ -29,7 +29,7 @@ export = class Feedback {
 			0,
 			TextService.GetTextSize(text, TEXT_SIZE, TEXT_FONT, new Vector2(math.huge, math.huge)).X + 36,
 			0,
-			50
+			50,
 		);
 		feedbackText.Parent = feedbackScreen;
 		feedbackScreen.Parent = game.GetService("CoreGui");

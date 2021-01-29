@@ -1,7 +1,7 @@
 const POSITION_PRECISION = 0.001;
 const ORIENTATION_PRECISION = 0.001;
 
-function round(number: number, place: number = 1) {
+function round(number: number, place = 1) {
 	return math.floor(number / place + 0.5) * place;
 }
 
@@ -27,7 +27,7 @@ function getSignificantDigits(n: number) {
 	return error("Couldn't reproduce accurate number for " + n);
 }
 
-export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): string {
+function formatValue(value: CheckableTypes[keyof CheckableTypes]): string {
 	switch (typeOf(value)) {
 		case "Axes":
 			return `new Axes(${tostring(value).gsub("(%u)(,?)", "Enum.Axis.%1%2")[0]})`;
@@ -45,15 +45,15 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 
 			return `CFrame.fromOrientation(math.rad(${round(orientation.X, ORIENTATION_PRECISION)}), math.rad(${round(
 				orientation.Y,
-				ORIENTATION_PRECISION
+				ORIENTATION_PRECISION,
 			)}), math.rad(${round(orientation.Z, ORIENTATION_PRECISION)})) + new Vector3(${round(
 				position.X,
-				POSITION_PRECISION
+				POSITION_PRECISION,
 			)}, ${round(position.Y, POSITION_PRECISION)}, ${round(position.Z, POSITION_PRECISION)})`;
 		}
 		case "Color3": {
-			const { r, g, b } = value as Color3;
-			return `Color3.fromRGB(${round(255 * r)}, ${round(255 * g)}, ${round(255 * b)})`;
+			const { R, G, B } = value as Color3;
+			return `Color3.fromRGB(${round(255 * R)}, ${round(255 * G)}, ${round(255 * B)})`;
 		}
 		case "ColorSequence":
 			return `new ColorSequence([${(value as ColorSequence).Keypoints.map(formatValue).join(", ")}])`;
@@ -70,13 +70,13 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 				MinWidth: minWidth,
 				InitialDockState: initialDockState,
 				InitialEnabled: initialEnabled,
-				InitialEnabledShouldOverrideRestore: initialEnabledShouldOverrideRestore
+				InitialEnabledShouldOverrideRestore: initialEnabledShouldOverrideRestore,
 			} = value as DockWidgetPluginGuiInfo;
 
 			return `new DockWidgetPluginGuiInfo(${formatValue(
-				initialDockState
+				initialDockState,
 			)}, ${initialEnabled}, ${initialEnabledShouldOverrideRestore}, ${formatValue(floatingXSize)}, ${formatValue(
-				floatingYSize
+				floatingYSize,
 			)}, ${formatValue(minHeight)}, ${formatValue(minWidth)})`;
 		}
 		case "Enum":
@@ -106,7 +106,7 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 		case "Rect": {
 			const {
 				Min: { X: minX, Y: minY },
-				Max: { X: maxX, Y: maxY }
+				Max: { X: maxX, Y: maxY },
 			} = value as Rect;
 
 			return `new Rect(${formatValue(minX)}, ${formatValue(minY)}, ${formatValue(maxX)}, ${formatValue(maxY)})`;
@@ -114,7 +114,7 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 		case "Region3": {
 			const { Size: size, CFrame: cframe } = value as Region3;
 			return `new Region3(${formatValue(cframe.Position.sub(size).mul(0.5))}, ${formatValue(
-				cframe.Position.add(size).mul(0.5)
+				cframe.Position.add(size).mul(0.5),
 			)})`;
 		}
 		case "UDim": {
@@ -124,10 +124,10 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 		case "UDim2": {
 			const {
 				X: { Offset: offsetX, Scale: scaleX },
-				Y: { Offset: offsetY, Scale: scaleY }
+				Y: { Offset: offsetY, Scale: scaleY },
 			} = value as UDim2;
 			return `new UDim2(${formatValue(scaleX)}, ${formatValue(offsetX)}, ${formatValue(scaleY)}, ${formatValue(
-				offsetY
+				offsetY,
 			)})`;
 		}
 		case "Vector2": {
@@ -146,4 +146,6 @@ export = function formatValue(value: CheckableTypes[keyof CheckableTypes]): stri
 		default:
 			return tostring(value);
 	}
-};
+}
+
+export = formatValue;

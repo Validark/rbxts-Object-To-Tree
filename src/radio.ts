@@ -7,11 +7,11 @@ import { Linear } from "@rbxts/easing-functions";
 import Tween, { PseudoTween } from "@rbxts/tween";
 
 type GetProperties2<T> = {
-	[Key in keyof T]-?: T[Key] extends Cue ? never : (() => any) extends T[Key] ? never : Key
+	[Key in keyof T]-?: T[Key] extends Cue ? never : (() => any) extends T[Key] ? never : Key;
 }[keyof T];
 
 type GetBindableToCues<T> = {
-	[key in ({ [k in keyof T]-?: T[k] extends Cue ? k : never })[keyof T]]: (T[key] extends Cue<infer R> ? R : never)
+	[key in { [k in keyof T]-?: T[k] extends Cue ? k : never }[keyof T]]: T[key] extends Cue<infer R> ? R : never;
 };
 
 /**
@@ -33,7 +33,7 @@ const OLD_IMAGES = {
 	0: 3336269098,
 	2: 3336269399,
 	4: 3336269669,
-	8: 3336269958
+	8: 3336269958,
 } as const;
 
 const IMAGES = {
@@ -41,12 +41,8 @@ const IMAGES = {
 	2: 3336484156,
 	4: 3336484351,
 	8: 3336484559,
-	16: 3336484747
+	16: 3336484747,
 } as const;
-
-type k = keyof typeof IMAGES;
-
-const f231 = IMAGES[0];
 
 for (let i = 0; i < 60; i++) {
 	frames[i] = new Vector2((i % COLUMNS) * DIMENSION_X, math.floor(i / COLUMNS) * DIMENSION_Y);
@@ -79,7 +75,7 @@ class Radio {
 			size?: 24 | 48;
 			borderRadius?: keyof typeof IMAGES;
 			theme?: "Light" | "Dark";
-		}
+		},
 	) {
 		const { onChecked: onChecked } = this;
 
@@ -111,9 +107,9 @@ class Radio {
 				this.currentTween = Tween(
 					HOVER_ANIMATION_TIME,
 					Linear,
-					x => (this.check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
+					(x) => (this.check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
 					this.hoverFrame % 7,
-					HOVER_FRAMES
+					HOVER_FRAMES,
 				);
 			}
 		};
@@ -128,9 +124,9 @@ class Radio {
 				this.currentTween = Tween(
 					HOVER_ANIMATION_TIME,
 					Linear,
-					x => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
+					(x) => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
 					this.hoverFrame % 7,
-					0
+					0,
 				);
 			}
 		};
@@ -194,8 +190,8 @@ class Radio {
 	}
 
 	public getBorderRadius() {
-		const assetId = tonumber(this.check.Image.slice(13));
-		for (const [borderRadius, id] of Object.entries(IMAGES)) if (assetId === id) return borderRadius;
+		const assetId = tonumber(this.check.Image.sub(13));
+		for (const [borderRadius, id] of pairs(IMAGES)) if (assetId === id) return borderRadius;
 		return 0;
 	}
 
@@ -253,9 +249,9 @@ class Radio {
 			this.currentTween = Tween(
 				ANIMATION_TIME,
 				Linear,
-				x => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
+				(x) => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5))]),
 				this.hoverFrame < 7 ? this.hoverFrame : 0,
-				FRAMES_PER_ANIMATION
+				FRAMES_PER_ANIMATION,
 			);
 		} else {
 			check.ImageTransparency = 0.46;
@@ -266,9 +262,9 @@ class Radio {
 			const currentTween = Tween(
 				ANIMATION_TIME,
 				Linear,
-				x => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5) % 60)]),
+				(x) => (check.ImageRectOffset = frames[(this.hoverFrame = math.floor(x + 0.5) % 60)]),
 				this.hoverFrame,
-				60 - (this.isHovering ? 0 : 0)
+				60 - (this.isHovering ? 0 : 0),
 			);
 
 			// currentTween.FinishCallback = finished => {
@@ -300,7 +296,7 @@ class Radio {
 			position: this.button.Position,
 			anchorPoint: this.button.AnchorPoint,
 			size: this.button.Size.X.Offset as 24 | 48,
-			borderRadius: this.getBorderRadius()
+			borderRadius: this.getBorderRadius(),
 		});
 	}
 }

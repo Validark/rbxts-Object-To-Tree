@@ -1,5 +1,6 @@
-node_modules
-include
-out
+/node_modules
+/include
+/out
 build.rbxmx
 bundle.rbxmx
+*.tsbuildinfo

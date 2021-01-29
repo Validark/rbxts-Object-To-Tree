@@ -2,38 +2,51 @@ import formatValue from "formatValue";
 import getAPIDump from "./apiDump";
 import { IO_SERVE_URL, OPTIONS } from "config";
 import Feedback from "feedback";
-import { HttpService, Lighting } from "@rbxts/services";
 import { SecurityType, ApiClass } from "api";
+
+const Lighting = game.GetService("Lighting");
+const HttpService = game.GetService("HttpService");
+
+const propNames = new Map<string, Set<string>>();
+
+function getPropNames(className: string) {
+	let classPropNames = propNames.get(className);
+
+	if (classPropNames === undefined) {
+		propNames.set(
+			className,
+			(classPropNames =
+				new Set(
+					getAPIDump()
+						?.get(className)
+						?.Members.map((m) => m.Name),
+				) ?? error("Unable to get indexable names for " + className)),
+		);
+	}
+
+	return classPropNames;
+}
 
 /** Given an object, will return an array of Children, excluding children with duplicate names */
 function getUniqueChildren(object: Instance) {
-	const takenNames = new Set<string>();
-	const shouldParse = new Set<string>();
+	const takenNames = getPropNames(object.ClassName);
+	const shouldParse = new Map<string, Instance>();
 
-	for (const { Name: name } of object.GetChildren()) {
+	for (const instance of object.GetChildren()) {
+		const { Name: name } = instance;
 		if (takenNames.has(name)) {
 			shouldParse.delete(name);
 		} else {
 			takenNames.add(name);
-			shouldParse.add(name);
+			shouldParse.set(name, instance);
 		}
 	}
 
-	const children = new Array<Instance>();
-
-	for (const objName of shouldParse)
-		children.push(
-			(object as Instance & {
-				[K: string]: Instance;
-			})[objName]
-		);
-
-	return children;
+	return shouldParse;
 }
 
 function getTSVariableName(name: string) {
-	const validName = name.match("[%a_][%w_]*")[0];
-	return validName ? name : "X";
+	return (name.match("^[%a_][%w_]*$")[0] as string) ?? "X";
 }
 
 /** Handwritten replacement function for properly extending roblox services */
@@ -112,7 +125,7 @@ const invalidTSBlacklist = new Set([
 	"interface",
 	"protected",
 	"implements",
-	"instanceof"
+	"instanceof",
 ]);
 
 function validTSIdentifier(str: string) {
@@ -145,20 +158,18 @@ function publishSlice(name: string, slice: string, parent: Instance) {
 function writeToLighting(name: string, source: string) {
 	name = name.split("/").pop()!;
 	const sourceSize = source.size();
-	const topSlice = publishSlice(name, source.slice(0, 20_000), Lighting);
+	const topSlice = publishSlice(name, source.sub(1, 20_000 - 1), Lighting);
 
 	if (sourceSize >= 20_000) {
-		let previous = 0;
-
-		for (let i = 20_000; i < source.size(); i += 20_000) {
-			publishSlice(name, source.slice(previous, i), topSlice);
-			previous = i;
+		let i = 20_000;
+		for (; i < source.size(); i += 20_000) {
+			publishSlice(name, source.sub(i, i + 19_999), topSlice);
 		}
 
+		publishSlice(name, source.sub(i), topSlice);
+
 		new Feedback(
-			`Generated files in Lighting! Your file was too long to put in a single script, so check ${
-				topSlice.Name
-			}'s children.`
+			`Generated files in Lighting! Your file was too long to put in a single script, so check ${topSlice.Name}'s children.`,
 		);
 	} else {
 		new Feedback(`Generated file \`${topSlice.Name}\` in Lighting!`);
@@ -170,7 +181,7 @@ function writeToIoServe(name: string, source: string) {
 	HttpService.RequestAsync({
 		Url: `${IO_SERVE_URL}/${name}`,
 		Method: "PUT",
-		Body: source
+		Body: source,
 	});
 	new Feedback(`Wrote to file \`${name}\` in io-serve!`);
 }
@@ -179,14 +190,14 @@ function writeToIoServe(name: string, source: string) {
 function patchToIoServe(
 	name: string,
 	source: string,
-	start: string = `import { EvaluateInstanceTree } from "@rbxts/validate-tree";\n\n`
+	start = `import { EvaluateInstanceTree } from "@rbxts/validate-tree";\n\n`,
 ) {
 	const previousFile = HttpService.RequestAsync({
 		Url: `${IO_SERVE_URL}/${name}`,
-		Method: "GET"
+		Method: "GET",
 	});
 
-	if (previousFile.Success && previousFile.Body.size() > 0) {
+	if (previousFile.Success && previousFile.Body) {
 		source = "\n" + source;
 	} else {
 		source = start + source;
@@ -195,22 +206,18 @@ function patchToIoServe(
 	HttpService.RequestAsync({
 		Url: `${IO_SERVE_URL}/${name}`,
 		Method: "PATCH",
-		Body: source
+		Body: source,
 	});
 
 	new Feedback(`Patched file \`${name}\` in io-serve!`);
 }
 
-function varIdentifier(str: string) {
-	str.find("");
-}
-
 /** Recursively generates trees for given objects */
-function generateSubInterface(results: Array<string>, instance: Instance, depth: number) {
-	results.push(`${"\t".rep(depth - 1)}${validTSIdentifier(instance.Name)}: ${instance.ClassName}`);
+function generateSubInterface(results: Array<string>, [instanceName, instance]: [string, Instance], depth: number) {
+	results.push(`${"\t".rep(depth - 1)}${validTSIdentifier(instanceName)}: ${instance.ClassName}`);
 	const children = getUniqueChildren(instance);
 
-	if (children.size() > 0) {
+	if (!children.isEmpty()) {
 		results.push(` & {\n`);
 
 		for (const child of children) {
@@ -232,13 +239,13 @@ function generateInterface(instance: Instance, useIoServe: boolean) {
 	return true;
 }
 
-function generateSubRojoInterface(results: Array<string>, instance: Instance, depth: number) {
+function generateSubRojoInterface(results: Array<string>, [instanceName, instance]: [string, Instance], depth: number) {
 	const children = getUniqueChildren(instance);
 	results.push("\t".rep(depth - 1));
-	results.push(validTSIdentifier(instance.Name));
+	results.push(validTSIdentifier(instanceName));
 	results.push(": ");
 
-	if (children.size() > 0) {
+	if (!children.isEmpty()) {
 		results.push(`{\n`);
 		results.push("\t".rep(depth));
 		results.push('$className: "');
@@ -283,11 +290,11 @@ const defaultObjects = {} as CreatableInstances;
 
 function getDefaultPropertyOfInstanceType<
 	T extends keyof CreatableInstances,
-	P extends GetProperties<CreatableInstances[T]>
+	P extends WritablePropertyNames<CreatableInstances[T]>
 >(className: T, property: P): CreatableInstances[T][P] {
 	let defaultObj = defaultObjects[className];
 	if (!defaultObj) {
-		let attempt = opcall(() => new Instance(className));
+		const attempt = opcall(() => new Instance(className));
 		if (attempt.success) {
 			defaultObjects[className] = defaultObj = attempt.value;
 		} else {
@@ -301,15 +308,15 @@ const hasText = (obj: Instance): obj is TextBox | TextLabel | TextButton =>
 	obj.IsA("TextBox") || obj.IsA("TextLabel") || obj.IsA("TextBox");
 
 const exclusionConditions: Array<{ condition: (obj: Instance) => boolean; omitProperties: Array<string> }> = [
-	{ condition: obj => obj.IsA("GuiObject"), omitProperties: ["Transparency"] },
+	{ condition: (obj) => obj.IsA("GuiObject"), omitProperties: ["Transparency"] },
 	{
-		condition: obj => obj.IsA("GuiObject") && obj.BackgroundTransparency === 1,
-		omitProperties: ["BackgroundColor3", "BorderColor3", "BorderSizePixel"]
+		condition: (obj) => obj.IsA("GuiObject") && obj.BackgroundTransparency === 1,
+		omitProperties: ["BackgroundColor3", "BorderColor3", "BorderSizePixel"],
 	},
-	{ condition: obj => obj.IsA("GuiObject") && obj.BorderSizePixel === 0, omitProperties: ["BorderColor3"] },
-	{ condition: obj => hasText(obj) && obj.TextStrokeTransparency === 1, omitProperties: ["TextStrokeColor3"] },
+	{ condition: (obj) => obj.IsA("GuiObject") && obj.BorderSizePixel === 0, omitProperties: ["BorderColor3"] },
+	{ condition: (obj) => hasText(obj) && obj.TextStrokeTransparency === 1, omitProperties: ["TextStrokeColor3"] },
 	{
-		condition: obj => hasText(obj) && obj.TextTransparency === 1,
+		condition: (obj) => hasText(obj) && obj.TextTransparency === 1,
 		omitProperties: [
 			"TextStrokeTransparency",
 			"TextStrokeColor3",
@@ -321,40 +328,48 @@ const exclusionConditions: Array<{ condition: (obj: Instance) => boolean; omitPr
 			"TextTransparency",
 			"TextWrapped",
 			"TextXAlignment",
-			"TextYAlignment"
-		]
+			"TextYAlignment",
+		],
 	},
 	{
-		condition: obj => obj.IsA("BasePart"),
-		omitProperties: ["Position", "Rotation", "Orientation", "BrickColor"]
+		condition: (obj) => obj.IsA("BasePart"),
+		omitProperties: ["Position", "Rotation", "Orientation", "BrickColor"],
 	},
-	{ condition: obj => obj.IsA("Attachment") || obj.IsA("BasePart"), omitProperties: ["Rotation", "CFrame"] },
-	{ condition: obj => obj.IsA("MeshPart"), omitProperties: ["MeshId"] },
-	{ condition: obj => obj.IsA("LuaSourceContainer"), omitProperties: ["Source"] }
+	{ condition: (obj) => obj.IsA("Attachment") || obj.IsA("BasePart"), omitProperties: ["Rotation", "CFrame"] },
+	{ condition: (obj) => obj.IsA("MeshPart"), omitProperties: ["MeshId"] },
+	{ condition: (obj) => obj.IsA("LuaSourceContainer"), omitProperties: ["Source"] },
 ];
 
 const ignoredTags = new ReadonlySet(["Deprecated", "NotScriptable", "ReadOnly"]);
 const validSecurityTags = new ReadonlySet<SecurityType>(["None", "PluginSecurity"]);
 
-function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, ommittedProperties = new Set<string>()) {
+function isDisjointWith(a: Array<unknown>, b: ReadonlySet<unknown>) {
+	for (const x of a) {
+		if (b.has(x)) return false;
+	}
+
+	return true;
+}
+
+function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, omittedProperties = new Set<string>()) {
 	for (const { condition, omitProperties } of exclusionConditions) {
-		if (condition(instance)) for (const omitProperty of omitProperties) ommittedProperties.add(omitProperty);
+		if (condition(instance)) for (const omitProperty of omitProperties) omittedProperties.add(omitProperty);
 	}
 
 	return rbxClass.Members.filter(
-		rbxMember =>
+		(rbxMember) =>
 			rbxMember.MemberType === "Property" &&
-			!ommittedProperties.has(rbxMember.Name) &&
-			(!rbxMember.Tags || new ReadonlySet(rbxMember.Tags).isDisjointWith(ignoredTags)) &&
+			!omittedProperties.has(rbxMember.Name) &&
+			(!rbxMember.Tags || isDisjointWith(rbxMember.Tags, ignoredTags)) &&
 			(typeIs(rbxMember.Security, "string")
 				? validSecurityTags.has(rbxMember.Security)
 				: validSecurityTags.has(rbxMember.Security.Read) && validSecurityTags.has(rbxMember.Security.Write)) &&
 			instance[rbxMember.Name as keyof typeof instance] !==
 				getDefaultPropertyOfInstanceType(
 					instance.ClassName as keyof CreatableInstances,
-					rbxMember.Name as GetProperties<CreatableInstances[keyof CreatableInstances]>
-				)
-	).sort(({ Name: a }, { Name: b }) => (a < b ? -1 : 1));
+					rbxMember.Name as WritablePropertyNames<CreatableInstances[keyof CreatableInstances]>,
+				),
+	).sort((a, b) => a.Name < b.Name);
 }
 
 function instantiateHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Instance, results: Array<string>) {
@@ -387,24 +402,19 @@ function generateInstantiation(instance: Instance, useIoServe: boolean) {
 	if (apiDump) {
 		(useIoServe ? patchToIoServe : writeToLighting)(
 			"src/" + getTSVariableName(instance.Name) + ".ts",
-			instantiateHelper(apiDump, instance, new Array<string>()).join("")
+			instantiateHelper(apiDump, instance, new Array<string>()).join(""),
 		);
 		return true;
 	} else return false;
 }
 
-function roactHelper(
-	apiDump: ReadonlyMap<string, ApiClass>,
-	instance: Instance,
-	results: Array<string>,
-	depth: number = 0
-) {
+function roactHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Instance, results: Array<string>, depth = 0) {
 	const rbxClass = apiDump.get(instance.ClassName);
 
 	if (rbxClass) {
 		const children = instance
 			.GetChildren()
-			.filter(child => child.IsA("GuiObject") || child.IsA("UIBase") || child.IsA("LayerCollector"));
+			.filter((child) => child.IsA("GuiObject") || child.IsA("UIBase") || child.IsA("LayerCollector"));
 
 		const indent = `\t`.rep(depth);
 		results.push(indent);
@@ -414,7 +424,7 @@ function roactHelper(
 		const propResults = new Array<string>();
 		let propLength = children.size() > 0 ? 1 : 2;
 
-		for (let { Name: prop } of getPropertiesToCompile(rbxClass, instance, new Set(["Parent"]))) {
+		for (const { Name: prop } of getPropertiesToCompile(rbxClass, instance, new Set(["Parent"]))) {
 			let valueStr = formatValue(instance[prop as keyof typeof instance]);
 			if (valueStr.find(`^".+"$`)[0] === undefined) valueStr = `{${valueStr}}`;
 			propLength += (depth + 1) * 4 + valueStr.size();
@@ -431,7 +441,7 @@ function roactHelper(
 
 		if (multiline) {
 			results.push(`\n`);
-			results.push(propResults.map(line => indent + "\t" + line).join("\n"));
+			results.push(propResults.map((line) => indent + "\t" + line).join("\n"));
 		} else {
 			results.push(` `);
 			results.push(propResults.join(" "));
@@ -476,6 +486,6 @@ function generateRoactInstantiation(instance: Instance, useIoServe: boolean) {
 export = new ReadonlyMap<OPTIONS, (instance: Instance, useIoServe: boolean) => boolean>([
 	["Instantiation code", generateInstantiation],
 	["Roact TSX code", generateRoactInstantiation],
-	["Rojo-eque tree", generateRojoInterface],
-	["TS types", generateInterface]
+	["Rojo-esque tree", generateRojoInterface],
+	["TS types", generateInterface],
 ]);

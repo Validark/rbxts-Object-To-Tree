@@ -5,9 +5,12 @@
 
 import { PLUGIN_NAME, OPTIONS, ICON_ID, DEFAULT_SETTING, IO_SERVE_URL, PLUGIN_DESCRIPTION } from "config";
 import Radio from "radio";
-import { Selection, HttpService } from "@rbxts/services";
 import generateOptions from "generateTree";
 import Feedback from "feedback";
+import { delay } from "@rbxts/delay-spawn-wait";
+
+const HttpService = game.GetService("HttpService");
+const Selection = game.GetService("Selection");
 
 delay(1, () => {
 	const widgetSize = new Vector2(227, 232); // new Vector2(224, 248);
@@ -20,8 +23,8 @@ delay(1, () => {
 			widgetSize.X,
 			widgetSize.Y,
 			widgetSize.X,
-			widgetSize.Y
-		)
+			widgetSize.Y,
+		),
 	);
 	DockWidget.Title = DockWidget.Name = "rbxts-object-to-tree";
 	delay(0, () => (DockWidget.Enabled = false));
@@ -163,7 +166,7 @@ delay(1, () => {
 			borderRadius: 16,
 			isChecked: false,
 
-			onChecked: isChecked => {
+			onChecked: (isChecked) => {
 				if (isChecked) {
 					plugin.SetSetting(DEFAULT_SETTING, option);
 
@@ -173,7 +176,7 @@ delay(1, () => {
 						}
 					}
 				}
-			}
+			},
 		});
 
 		FullButton.MouseButton1Click.Connect(() => {
@@ -228,7 +231,7 @@ delay(1, () => {
 
 				if (success && selectionSize !== 1) {
 					new Feedback(
-						useIoServe ? "Sent multiple files to io-serve" : "Generated multiple files in Lighting!"
+						useIoServe ? "Sent multiple files to io-serve" : "Generated multiple files in Lighting!",
 					);
 				}
 			} else {

@@ -6,7 +6,7 @@
 		"release-major": "npm version major && git push --tags",
 		"release-minor": "npm version minor && git push --tags",
 		"release-patch": "npm version patch && git push --tags",
-		"build-plugin": "rbxtsc && rojo build --output bundle.rbxmx & cp -f bundle.rbxmx C:/Users/blach/AppData/Local/Roblox/Plugins/rbxts-object-tree.rbxmx",
+		"build-plugin": "rbxtsc && rojo build --output rbxtsc-object-to-tree.rbxmx",
 		"plugin-build": "npm run build-plugin",
 		"install-rojo": "cargo install --force --git https://github.com/LPGhatguy/rojo.git"
 	},
@@ -23,8 +23,19 @@
 	"homepage": "https://github.com/roblox-ts/demo-bundle#readme",
 	"dependencies": {
 		"@rbxts/cue": "^1.0.1",
-		"@rbxts/services": "^1.0.23",
-		"@rbxts/tween": "^1.0.2",
-		"@rbxts/types": "^1.0.243"
+		"@rbxts/delay-spawn-wait": "^2.0.0",
+		"@rbxts/tween": "^1.0.4"
+	},
+	"devDependencies": {
+		"@rbxts/compiler-types": "^1.0.0-beta.15.0",
+		"@rbxts/types": "^1.0.443",
+		"@typescript-eslint/eslint-plugin": "^4.14.1",
+		"@typescript-eslint/parser": "^4.14.1",
+		"eslint": "^7.18.0",
+		"eslint-config-prettier": "^7.2.0",
+		"eslint-plugin-prettier": "^3.3.1",
+		"eslint-plugin-roblox-ts": "0.0.24",
+		"prettier": "^2.2.1",
+		"typescript": "^4.1.3"
 	}
 }
