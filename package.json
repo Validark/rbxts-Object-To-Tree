@@ -7,7 +7,7 @@
 		"release-major": "npm version major && git push --tags",
 		"release-minor": "npm version minor && git push --tags",
 		"release-patch": "npm version patch && git push --tags",
-		"build-plugin": "rbxtsc && rojo build --output rbxtsc-object-to-tree.rbxmx",
+		"build-plugin": "rbxtsc && rojo build --output rbxts-object-to-tree.rbxmx",
 		"plugin-build": "npm run build-plugin",
 		"install-rojo": "cargo install --force --git https://github.com/LPGhatguy/rojo.git"
 	},

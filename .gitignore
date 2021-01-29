@@ -2,5 +2,5 @@
 /include
 /out
 build.rbxmx
-bundle.rbxmx
+rbxts-object-to-tree.rbxmx
 *.tsbuildinfo

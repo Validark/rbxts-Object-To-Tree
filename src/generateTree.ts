@@ -7,7 +7,7 @@ import { SecurityType, ApiClass } from "api";
 const Lighting = game.GetService("Lighting");
 const HttpService = game.GetService("HttpService");
 
-const propNames = new Map<string, Set<string>>();
+const propNames = new Map<string, ReadonlyArray<string>>();
 
 function getPropNames(className: string) {
 	let classPropNames = propNames.get(className);
@@ -16,11 +16,9 @@ function getPropNames(className: string) {
 		propNames.set(
 			className,
 			(classPropNames =
-				new Set(
-					getAPIDump()
-						?.get(className)
-						?.Members.map((m) => m.Name),
-				) ?? error("Unable to get indexable names for " + className)),
+				getAPIDump()
+					?.get(className)
+					?.Members.map((m) => m.Name) ?? error("Unable to get indexable names for " + className)),
 		);
 	}
 
@@ -29,11 +27,12 @@ function getPropNames(className: string) {
 
 /** Given an object, will return an array of Children, excluding children with duplicate names */
 function getUniqueChildren(object: Instance) {
-	const takenNames = getPropNames(object.ClassName);
+	const takenNames = new Set(getPropNames(object.ClassName));
 	const shouldParse = new Map<string, Instance>();
 
 	for (const instance of object.GetChildren()) {
 		const { Name: name } = instance;
+
 		if (takenNames.has(name)) {
 			shouldParse.delete(name);
 		} else {
@@ -161,12 +160,9 @@ function writeToLighting(name: string, source: string) {
 	const topSlice = publishSlice(name, source.sub(1, 20_000 - 1), Lighting);
 
 	if (sourceSize >= 20_000) {
-		let i = 20_000;
-		for (; i < source.size(); i += 20_000) {
+		for (let i = 20_000; i < source.size(); i += 20_000) {
 			publishSlice(name, source.sub(i, i + 19_999), topSlice);
 		}
-
-		publishSlice(name, source.sub(i), topSlice);
 
 		new Feedback(
 			`Generated files in Lighting! Your file was too long to put in a single script, so check ${topSlice.Name}'s children.`,
@@ -369,7 +365,7 @@ function getPropertiesToCompile(rbxClass: ApiClass, instance: Instance, omittedP
 					instance.ClassName as keyof CreatableInstances,
 					rbxMember.Name as WritablePropertyNames<CreatableInstances[keyof CreatableInstances]>,
 				),
-	).sort((a, b) => a.Name < b.Name);
+	).sort(({ Name: a }, { Name: b }) => a !== "Parent" && (b === "Parent" || a < b));
 }
 
 function instantiateHelper(apiDump: ReadonlyMap<string, ApiClass>, instance: Instance, results: Array<string>) {
