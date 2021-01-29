@@ -1,6 +1,6 @@
 {
 	"name": "rbxts-object-to-tree",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"private": true,
 	"description": "Converts an object in Roblox Studio into its TS tree form.",
 	"scripts": {
