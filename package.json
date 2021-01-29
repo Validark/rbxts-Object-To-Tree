@@ -1,6 +1,6 @@
 {
 	"name": "rbxts-object-to-tree",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Converts an object in Roblox Studio into its TS tree form.",
 	"scripts": {
 		"release-major": "npm version major && git push --tags",
